@@ -34,7 +34,7 @@ io.use(async (socket, next) => {
             //     socket.disconnect(true);
             // }
             // else {
-            Users[String(socket.id)] = decoded._id
+            Users[String(socket.id)] = socket.handshake.query.id
             next();
             // }
         }
