@@ -30,6 +30,7 @@ io.use(async (socket, next) => {
             Users[String(socket.id)] = socket.handshake.query.id
             console.log("XXXXXXXXXXXXXX")
             io.emit('connect', { "data": "success" })
+            next()
         }
         else if (socket.handshake.query && socket.handshake.query.token) {
             let decoded = jwt.verify(socket.handshake.query.token, config.get("JWT_OPTIONS").SECRET_KEY);
