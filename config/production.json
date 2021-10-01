@@ -1,0 +1,15 @@
+{
+    "PORT": 3001,
+    "DB_URL": "mongodb://localhost:27017/athletachat",
+    "REDIS": {
+        "PORT": "6379",
+        "HOST": "127.0.0.1"
+    },
+    "JWT_OPTIONS": {
+        "SECRET_KEY": "Lr-x9g5-Rq-yB6NNcTKlVQ.ZvRscU8PgFGNIRJhg16i1y6CpyxaiMeGzeQzcFoxaCs",
+        "EXPIRES_IN": "90d"
+    },
+    "FCM_TOKEN": "AAAA0JP304U:APA91bGK7LafNM9_d--GvD7GcNAW130M6-3yQ5Myma2oxCFR6pVhBBZmV69agAFtraJab8ZAn3k1qtRMm7G0uFUoLD0gaADT5Pjfi-x2Kd15bY_hP6JUDOqIzorqym_Ot7mHaphMRfQQ",
+    "EMAIL_SERVICE": 0,
+    "SENDGRID_API_KEY": "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"
+}
