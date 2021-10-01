@@ -3,12 +3,10 @@ const Schema = mongoose.Schema;
 const ObjectId = mongoose.Types.ObjectId
 const ChatModel = new Schema({
     user1: {
-        type: ObjectId,
-        ref: 'users'
+        type: ObjectId
     },
     user2: {
-        type: ObjectId,
-        ref: 'users'
+        type: ObjectId
     },
     isDeleted: {
         type: Boolean,

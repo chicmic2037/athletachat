@@ -26,7 +26,19 @@ let Users = {
 
 io.use(async (socket, next) => {
     try {
-        if (socket.handshake.query && socket.handshake.query.token) {
+        if (socket.handshake.query && socket.handshake.query.id) {
+            console.log(socket.handshake.query.id)
+            // let decoded = jwt.verify(socket.handshake.query.id, config.get("JWT_OPTIONS").SECRET_KEY);
+            // if (!decoded) {
+            //     console.log('Socket Authentication error')
+            //     socket.disconnect(true);
+            // }
+            // else {
+            Users[String(socket.id)] = decoded._id
+            next();
+            // }
+        }
+        else if (socket.handshake.query && socket.handshake.query.token) {
             let decoded = jwt.verify(socket.handshake.query.token, config.get("JWT_OPTIONS").SECRET_KEY);
             if (!decoded) {
                 console.log('Socket Authentication error')
@@ -159,10 +171,10 @@ io.use(async (socket, next) => {
             payload.sender = Users[String(socket.id)]
             payload.data = data
             let sendObj = await controllers.sendMessage(payload)
-            if(sendObj.status != 200) {
+            if (sendObj.status != 200) {
                 io.to(Users[String(socket.id)]).emit("sendMessage", sendObj)
             }
-            else{
+            else {
                 io.to(payload.data.userId).emit("recieveMessage", sendObj);
                 controllers.sendMessagePushNotification(sendObj);
                 sendObj.message = "MESSAGE_SENT_SUCCESSFULLY"
