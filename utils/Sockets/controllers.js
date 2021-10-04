@@ -103,6 +103,7 @@ module.exports = {
     },
     sendMessage: async (payload) => {
         try {
+            console.log(payload)
             payload.user = parseInt(payload.user)
             payload.userId = parseInt(payload.userId)
             let chatId = ''

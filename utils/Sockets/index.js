@@ -84,8 +84,9 @@ io.use(async (socket, next) => {
     socket.on("sendMessage", async (data) => {
         try {
             console.log("************ User sendMessage Socket **********", socket.id, Users[String(socket.id)], data)
-            let payload = data
+            let payload = { ...data }
             payload.user = parseInt(Users[String(socket.id)])
+            console.log(payload)
             let result = controllers.sendMessage(payload)
             io.to(Users[String(socket.id)]).emit('sendMessage', result)
         } catch (error) {
