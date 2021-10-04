@@ -106,13 +106,14 @@ module.exports = {
             let chatId = ''
             if (!payload.chatId) {
                 chatId = await MODELS.chat({ user1: parseInt(payload.user), user2: parseInt(payload.userId) }).save()
+                chatId = await MODELS.chat.findOne({ user1: parseInt(payload.user), user2: parseInt(payload.userId) }).lean()
             }
             await MODELS.message({
                 type: payload.type,
                 sender: parseInt(payload.user),
                 reciever: parseInt(payload.userId),
                 text: payload.text,
-                chatId: chatId
+                chatId: chatId._id
             }).save()
             return {
                 status: CODES.OK, message: MESSAGES.MESSAGE_SENT_SUCCESSFULLY, data: {
@@ -121,7 +122,8 @@ module.exports = {
                     reciever: parseInt(payload.userId),
                     text: payload.text,
                     chatId: chatId
-                } }
+                }
+            }
         }
         catch (error) {
             console.log(error)
