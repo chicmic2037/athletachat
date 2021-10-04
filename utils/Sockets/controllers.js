@@ -110,7 +110,13 @@ module.exports = {
                 chatId = await MODELS.chat({ user1: user, user2: payload.userId }).save()
                 chatId = await MODELS.chat.findOne({ user1: payload.user, user2: payload.userId }).lean()
             }
-            console.log(payload)
+            console.log({
+                type: payload.type,
+                sender: user,
+                reciever: payload.userId,
+                text: payload.text,
+                chatId: chatId._id
+            })
             await MODELS.message({
                 type: payload.type,
                 sender: user,
