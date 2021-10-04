@@ -103,15 +103,17 @@ module.exports = {
     },
     sendMessage: async (payload) => {
         try {
+            payload.user = parseInt(payload.user)
+            payload.userId = parseInt(payload.userId)
             let chatId = ''
             if (!payload.chatId) {
-                chatId = await MODELS.chat({ user1: parseInt(payload.user), user2: parseInt(payload.userId) }).save()
-                chatId = await MODELS.chat.findOne({ user1: parseInt(payload.user), user2: parseInt(payload.userId) }).lean()
+                chatId = await MODELS.chat({ user1: payload.user, user2: payload.userId }).save()
+                chatId = await MODELS.chat.findOne({ user1: payload.user, user2: payload.userId }).lean()
             }
             await MODELS.message({
                 type: payload.type,
-                sender: parseInt(payload.user),
-                reciever: parseInt(payload.userId),
+                sender: payload.user,
+                reciever: payload.userId,
                 text: payload.text,
                 chatId: chatId._id
             }).save()
