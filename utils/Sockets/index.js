@@ -84,7 +84,7 @@ io.use(async (socket, next) => {
     socket.on("sendMessage", async (data) => {
         try {
             console.log("************ User sendMessage Socket **********", socket.id, Users[String(socket.id)], data)
-            console.log(typeof data)
+            data = JSON.parse(data)
             let payload = { ...data }
             payload.user = Users[String(socket.id)]
             let result = await controllers.sendMessage(payload, Users[String(socket.id)])
