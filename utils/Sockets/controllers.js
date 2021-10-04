@@ -103,48 +103,25 @@ module.exports = {
     },
     sendMessage: async (payload) => {
         try {
-            let setObj = { ...payload.data }
-            setObj.sender = MODELS.ObjectId(payload.sender)
-            setObj.reciever = MODELS.ObjectId(setObj.userId)
-            delete setObj['userId']
-            let isUnMatched = await MODELS.unMatchedUsers.findOne({
-                unMatched: setObj.sender,
-                unMatchedBy: setObj.reciever,
-                chatId: setObj.chatId
-            }).lean()
-            if(isUnMatched) return { status: CODES.BAD_REQUEST, message: MESSAGES.UNMATCHED_BY_USER, data: {isUnMatched:true} }
-            let message = await MODELS.message(setObj).save()
-            message = await MODELS.message.aggregate([
-                {
-                    $match: { _id: message._id }
-                },
-                {
-                    $lookup: {
-                        localField: "sender",
-                        foreignField: "_id",
-                        from: "users",
-                        as: "sender"
-                    }
-                },
-                {
-                    $unwind: "$sender"
-                },
-                {
-                    $lookup: {
-                        localField: "reciever",
-                        foreignField: "_id",
-                        from: "users",
-                        as: "reciever"
-                    }
-                },
-                {
-                    $unwind: "$reciever"
-                },
-                {
-                    $project: PROJECTIONS.sendMessage
-                }
-            ])
-            return { status: CODES.OK, message: MESSAGES.MESSAGE_SENT_SUCCESSFULLY, data: { ...message[0], isUnMatched: false } }
+            let chatId = ''
+            if (!payload.chatId) {
+                chatId = await MODELS.chat({ user1: parseInt(payload.user), user2: parseInt(payload.userId) }).save()
+            }
+            await MODELS.message({
+                type: payload.type,
+                sender: parseInt(payload.user),
+                reciever: parseInt(payload.userId),
+                text: payload.text,
+                chatId: chatId
+            }).save()
+            return {
+                status: CODES.OK, message: MESSAGES.MESSAGE_SENT_SUCCESSFULLY, data: {
+                    type: payload.type,
+                    sender: parseInt(payload.user),
+                    reciever: parseInt(payload.userId),
+                    text: payload.text,
+                    chatId: chatId
+                } }
         }
         catch (error) {
             console.log(error)

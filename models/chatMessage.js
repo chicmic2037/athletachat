@@ -8,11 +8,11 @@ const ChatMessageModel = new Schema({
         enum: ENUMS.MESSAGE_TYPES
     },
     sender: {
-        type: ObjectId,
+        type: Number,
         required: false
     },
     reciever: {
-        type: ObjectId,
+        type: Number,
         required: true
     },
     text: {
