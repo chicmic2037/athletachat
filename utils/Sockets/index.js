@@ -1,5 +1,5 @@
 const { Server } = require('socket.io');
-const io = new Server({path:'/socket.io'});
+const io = new Server();
 const config = require('config')
 const jwt = require('jsonwebtoken')
 const controllers = require('./controllers');
