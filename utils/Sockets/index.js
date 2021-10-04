@@ -3,7 +3,6 @@ const io = new Server();
 const config = require('config')
 const jwt = require('jsonwebtoken')
 const controllers = require('./controllers');
-const { PHONE_NUMBER_ALREADY_ASSOCIATED_WITH_ANOTHER_ACCOUNT } = require('../../constants/messages');
 var Socket = {
     emit: function (event, data) {
         console.log("************* Socket Emit *************************")
@@ -84,7 +83,6 @@ io.use(async (socket, next) => {
     socket.on("sendMessage", async (data) => {
         try {
             console.log("************ User sendMessage Socket **********", socket.id, Users[String(socket.id)], data)
-            data = JSON.parse(data)
             let payload = { ...data }
             payload.user = Users[String(socket.id)]
             let result = await controllers.sendMessage(payload, Users[String(socket.id)])
