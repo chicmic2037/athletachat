@@ -1,5 +1,5 @@
 const { Server } = require('socket.io');
-const io = new Server();
+const io = new Server({ cors: { origin: '*' } });
 const config = require('config')
 const jwt = require('jsonwebtoken')
 const controllers = require('./controllers');
@@ -87,6 +87,7 @@ io.use(async (socket, next) => {
             payload.user = Users[String(socket.id)]
             let result = await controllers.sendMessage(payload, Users[String(socket.id)])
             io.to(Users[String(socket.id)]).emit('sendMessage', result)
+            io.to(payload.userId).emit('recieveMessage', result)
         } catch (error) {
             console.log(error)
         }
