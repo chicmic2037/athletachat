@@ -117,6 +117,17 @@ io.use(async (socket, next) => {
         }
     })
 
+    socket.on("getMessages", async (data) => {
+        try {
+            console.log("************ User getMessages Socket **********", socket.id, Users[String(socket.id)], data)
+            let payload = { ...data }
+            let result = await controllers.getMessages(payload)
+            io.to(Users[String(socket.id)]).emit('getMessages', result)
+        } catch (error) {
+            console.log(error)
+        }
+    })
+
 });
 exports.Socket = Socket;
 exports.io = io;

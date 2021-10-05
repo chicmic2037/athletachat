@@ -250,4 +250,13 @@ module.exports = {
             console.log(error)
         }
     },
+    getMessages: async (payload) => {
+        try {
+            let obj = await MODELS.message.find({ chatId: MODELS.ObjectId(payload.chatId) }).lean()
+            return { status: CODES.OK, message: MESSAGES.CHATS_FETCHED_SUCCESSFULLY, data: obj }
+        }
+        catch (error) {
+            console.log(error)
+        }
+    },
 }
