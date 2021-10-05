@@ -101,36 +101,28 @@ module.exports = {
             console.log(error)
         }
     },
-    sendMessage: async (payload, user) => {
+    sendMessage: async (payload) => {
         try {
             console.log(payload)
-            payload.userId = parseInt(payload.userId)
+            payload.sender = parseInt(payload.sender)
+            payload.reciever = parseInt(payload.reciever)
             let chatId = payload.chatId
             if (!chatId) {
-                chatId = await MODELS.chat({ user1: user, user2: payload.userId }).save()
-                chatId = await MODELS.chat.findOne({ user1: payload.user, user2: payload.userId }).lean()
+                chatId = await MODELS.chat({ user1: payload.sender, user2: payload.reciever }).save()
+                chatId = await MODELS.chat.findOne({ user1: payload.sender, user2: payload.reciever }).lean()
                 chatId = chatId._id
             }
             console.log({
-                type: payload.type,
-                sender: user,
-                reciever: payload.userId,
-                text: payload.text,
+                ...payload,
                 chatId: chatId
             })
             await MODELS.message({
-                type: payload.type,
-                sender: user,
-                reciever: payload.userId,
-                text: payload.text,
+                ...payload,
                 chatId: chatId
             }).save()
             return {
                 status: CODES.OK, message: MESSAGES.MESSAGE_SENT_SUCCESSFULLY, data: {
-                    type: payload.type,
-                    sender: user,
-                    reciever: payload.userId,
-                    text: payload.text,
+                    ...payload,
                     chatId: chatId
                 }
             }

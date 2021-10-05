@@ -84,8 +84,10 @@ io.use(async (socket, next) => {
         try {
             console.log("************ User sendMessage Socket **********", socket.id, Users[String(socket.id)], data)
             let payload = { ...data }
-            payload.user = Users[String(socket.id)]
-            let result = await controllers.sendMessage(payload, Users[String(socket.id)])
+            payload.reciever = payload.userId
+            delete payload.userId
+            payload.sender = Users[String(socket.id)]
+            let result = await controllers.sendMessage(payload)
             io.to(Users[String(socket.id)]).emit('sendMessage', result)
             io.to(payload.userId).emit('recieveMessage', result)
         } catch (error) {
