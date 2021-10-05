@@ -89,7 +89,7 @@ io.use(async (socket, next) => {
             payload.sender = Users[String(socket.id)]
             let result = await controllers.sendMessage(payload)
             io.to(Users[String(socket.id)]).emit('sendMessage', result)
-            io.to(payload.userId).emit('recieveMessage', result)
+            io.to(data.userId).emit('recieveMessage', result)
         } catch (error) {
             console.log(error)
         }
