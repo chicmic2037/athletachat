@@ -105,17 +105,18 @@ module.exports = {
         try {
             console.log(payload)
             payload.userId = parseInt(payload.userId)
-            let chatId = ''
-            if (!payload.chatId) {
+            let chatId = payload.chatId
+            if (!chatId) {
                 chatId = await MODELS.chat({ user1: user, user2: payload.userId }).save()
                 chatId = await MODELS.chat.findOne({ user1: payload.user, user2: payload.userId }).lean()
+                chatId = chatId._id
             }
             console.log({
                 type: payload.type,
                 sender: user,
                 reciever: payload.userId,
                 text: payload.text,
-                chatId: chatId._id
+                chatId: chatId
             })
             await MODELS.message({
                 type: payload.type,
