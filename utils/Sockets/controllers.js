@@ -116,15 +116,12 @@ module.exports = {
                 ...payload,
                 chatId: chatId
             })
-            await MODELS.message({
+            let msg = await MODELS.message({
                 ...payload,
                 chatId: chatId
             }).save()
             return {
-                status: CODES.OK, message: MESSAGES.MESSAGE_SENT_SUCCESSFULLY, data: {
-                    ...payload,
-                    chatId: chatId
-                }
+                status: CODES.OK, message: MESSAGES.MESSAGE_SENT_SUCCESSFULLY, data: msg
             }
         }
         catch (error) {
