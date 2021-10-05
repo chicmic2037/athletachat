@@ -123,7 +123,7 @@ module.exports = {
                 sender: user,
                 reciever: payload.userId,
                 text: payload.text,
-                chatId: chatId._id
+                chatId: chatId
             }).save()
             return {
                 status: CODES.OK, message: MESSAGES.MESSAGE_SENT_SUCCESSFULLY, data: {
