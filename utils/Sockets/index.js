@@ -93,6 +93,17 @@ io.use(async (socket, next) => {
         }
     })
 
+
+    socket.on("getChatList", async (data) => {
+        try {
+            console.log("************ User getChatList Socket **********", socket.id, Users[String(socket.id)], data)
+            let result = await controllers.getChatList(Users[String(socket.id)])
+            io.to(Users[String(socket.id)]).emit('getChatList', result)
+        } catch (error) {
+            console.log(error)
+        }
+    })
+
 });
 exports.Socket = Socket;
 exports.io = io;

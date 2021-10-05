@@ -230,4 +230,13 @@ module.exports = {
             console.log(error)
         }
     },
+    getChatList: async (payload) => {
+        try {
+            let obj = await MODELS.chat.find({ $or: [{ user1: parseInt(payload) }, { user2: parseInt(payload) }] }).lean()
+            return { status: CODES.OK, message: MESSAGES.CHATS_FETCHED_SUCCESSFULLY, data: obj }
+        }
+        catch (error) {
+            console.log(error)
+        }
+    },
 }
