@@ -13,12 +13,8 @@ module.exports = {
     */
     response: async (res, status, message, data, lang) => {
         if (status != 200) {
-            let log = await Logs.findByIdAndUpdate(res.id, { code: status, message: message, res: JSON.stringify(data), resTime: getMillinseconds(res.time), error: true }, { new: true }).lean().exec()
-            SOCKETS.emit('getLog', log)
             return await res.status(status).send({ status: status, message: await Messages[lang][message] });
         }
-        let log = await Logs.findByIdAndUpdate(res.id, { code: status, message: message, res: JSON.stringify(data), resTime: getMillinseconds(res.time) }, { new: true }).lean().exec()
-        SOCKETS.emit('getLog', log)
         return await res.status(status).send({ status: status, message: await Messages[lang][message], result: data });
     },
     getMillinseconds: (time) => {
