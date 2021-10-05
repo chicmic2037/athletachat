@@ -42,13 +42,14 @@ app.use(express.urlencoded({ extended: false }));
 Serving Static Files
 */
 app.use('/uploads', express.static(__dirname + "/uploads"));
-app.use('/user/profile/image', express.static(__dirname + "/uploads"));
 /*
 Test API
 */
 app.use('/test', async (req, res, next) => {
     res.status(200).send({ status: 200, message: "TEST API", data: {} })
 });
+const route = require('./route');
+app.use('/api', route)
 /*
 Catch 404 Error
 */
