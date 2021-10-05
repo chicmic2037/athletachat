@@ -97,6 +97,7 @@ io.use(async (socket, next) => {
     socket.on("getChatList", async (data) => {
         try {
             console.log("************ User getChatList Socket **********", socket.id, Users[String(socket.id)], data)
+
             let result = await controllers.getChatList(Users[String(socket.id)])
             io.to(Users[String(socket.id)]).emit('getChatList', result)
         } catch (error) {
@@ -110,7 +111,12 @@ io.use(async (socket, next) => {
             payload.userId = parseInt(payload.userId)
             payload.user = parseInt(Users[String(socket.id)])
             let result = await controllers.getChatId(payload)
-            result.data = { "chatId": result.data._id }
+            if (result.data && result.data._id) {
+                result.data = { "chatId": result.data._id }
+            }
+            else {
+                result.data = { "chatId": null }
+            }
             io.to(Users[String(socket.id)]).emit('getChatId', result)
         } catch (error) {
             console.log(error)
