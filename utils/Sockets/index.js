@@ -103,6 +103,17 @@ io.use(async (socket, next) => {
             console.log(error)
         }
     })
+    socket.on("getChatId", async (data) => {
+        try {
+            console.log("************ User getChatId Socket **********", socket.id, Users[String(socket.id)], data)
+            payload.userId = parseInt(payload.userId)
+            payload.user = parseInt(Users[String(socket.id)])
+            let result = await controllers.getChatId(payload)
+            io.to(Users[String(socket.id)]).emit('getChatId', result)
+        } catch (error) {
+            console.log(error)
+        }
+    })
 
 });
 exports.Socket = Socket;

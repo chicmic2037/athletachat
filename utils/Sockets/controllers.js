@@ -239,4 +239,15 @@ module.exports = {
             console.log(error)
         }
     },
+    getChatId: async (payload) => {
+        try {
+            let obj = await MODELS.chat.findOne({ user1: payload.user, user2: payload.userId }).lean()
+            if (obj) return { status: CODES.OK, message: MESSAGES.CHATS_FETCHED_SUCCESSFULLY, data: obj }
+            else obj = await MODELS.chat.findOne({ user1: payload.user, user2: payload.userId }).lean()
+            return { status: CODES.OK, message: MESSAGES.CHATS_FETCHED_SUCCESSFULLY, data: obj }
+        }
+        catch (error) {
+            console.log(error)
+        }
+    },
 }
