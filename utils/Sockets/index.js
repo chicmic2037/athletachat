@@ -106,6 +106,7 @@ io.use(async (socket, next) => {
     socket.on("getChatId", async (data) => {
         try {
             console.log("************ User getChatId Socket **********", socket.id, Users[String(socket.id)], data)
+            let payload = { ...data }
             payload.userId = parseInt(payload.userId)
             payload.user = parseInt(Users[String(socket.id)])
             let result = await controllers.getChatId(payload)
