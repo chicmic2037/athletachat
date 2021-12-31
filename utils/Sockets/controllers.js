@@ -107,7 +107,7 @@ module.exports = {
             payload.sender = parseInt(payload.sender)
             payload.reciever = parseInt(payload.reciever)
             let chatId = payload.chatId
-            if (!chatId) {
+            if (chatId == "null") {
                 chatId = await MODELS.chat({ user1: payload.sender, user2: payload.reciever }).save()
                 chatId = await MODELS.chat.findOne({ user1: payload.sender, user2: payload.reciever }).lean()
                 chatId = chatId._id
