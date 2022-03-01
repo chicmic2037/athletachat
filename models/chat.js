@@ -10,6 +10,13 @@ const ChatModel = new Schema({
     isDeleted: {
         type: Boolean,
         default: false
+    },
+    lastMessage: {
+        type: String,
+        default: ""
+    },
+    lastMessageTime: {
+        type: Date
     }
 }, { timestamps: true });
 const Chat = mongoose.model('Chats', ChatModel);
