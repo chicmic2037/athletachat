@@ -21,7 +21,6 @@ module.exports = {
         catch (error) {
             console.log(error)
         }
-
     },
     disLike: async (payload) => {
         try {
@@ -107,10 +106,12 @@ module.exports = {
             payload.sender = parseInt(payload.sender)
             payload.reciever = parseInt(payload.reciever)
             let chatId = payload.chatId
-            if (!chatId) {
-                chatId = await MODELS.chat({ user1: payload.sender, user2: payload.reciever }).save()
-                chatId = await MODELS.chat.findOne({ user1: payload.sender, user2: payload.reciever }).lean()
-                chatId = chatId._id
+            if (chatId == "null" || !chatId || !require('mongoose').Types.ObjectId.isValid(chatId)) {
+                let obj = await MODELS.chat.findOne({ $or: [{ user1: payload.sender, user2: payload.reciever }, { user1: payload.reciever, user2: payload.sender }] }).lean();
+                if (!obj) {
+                    obj = await MODELS.chat({ user1: payload.sender, user2: payload.reciever }).save()
+                }
+                chatId = obj._id
             }
             console.log({
                 ...payload,
@@ -120,6 +121,8 @@ module.exports = {
                 ...payload,
                 chatId: chatId
             }).save()
+            let last_message = payload.text || "File"
+            await MODELS.chat.findOneAndUpdate({_id:chatId},{lastMessage: last_message , lastMessageTime: new Date()});
             return {
                 status: CODES.OK, message: MESSAGES.MESSAGE_SENT_SUCCESSFULLY, data: msg
             }
@@ -176,8 +179,8 @@ module.exports = {
     },
     messageRead: async (payload) => {
         try {
-            let message = await MODELS.message.findByIdAndUpdate(MODELS.ObjectId(payload.messageId), { isReaded: true }).lean()
-            return { status: CODES.OK, message: MESSAGES.MESSAGE_READ_SUCCESSFULLY, data: { chatId: message.chatId, messageId: message._id, sender: message.sender } }
+            await MODELS.message.updateMany({ createdAt: { $lte: new Date() }, isReaded: false ,reciever: payload.userId, chatId: payload.chatId}, { $set:{isReaded: true} });
+            return { status: CODES.OK, message: MESSAGES.MESSAGE_READ_SUCCESSFULLY}
         }
         catch (error) {
             console.log(error)
@@ -222,7 +225,52 @@ module.exports = {
     },
     getChatList: async (payload) => {
         try {
-            let obj = await MODELS.chat.find({ $or: [{ user1: parseInt(payload) }, { user2: parseInt(payload) }] }).lean()
+            // let obj = await MODELS.chat.find({ $or: [{ user1: parseInt(payload) }, { user2: parseInt(payload) }] }).lean()
+            let criteria = [
+                {
+                    $match: {
+                        $or: [{ user1: parseInt(payload) }, { user2: parseInt(payload) }]
+                    }
+                },
+                {
+                    $lookup: {
+                        from: "chatmessages",
+                        let: { id: "$_id" },
+                        pipeline: [
+                            {
+                                $match:
+                                {
+                                    $expr:
+                                    {
+                                        $and:
+                                            [
+                                                { $eq: ["$chatId", "$$id"] },
+                                                { $eq: ["$isReaded", false] },
+                                                { $eq: ["$reciever", parseInt(payload)] }
+                                            ]
+                                    }
+                                }
+                            },
+                            { $count: "total" }
+                        ],
+                        as: "chats"
+                    }
+                },
+                { $unwind: { path: '$chats', "preserveNullAndEmptyArrays": true } },
+                {
+                    $addFields: {
+                        conversationWith: { $cond: [{ $ne: ["$user2", parseInt(payload)] }, "$user2", "$user1"] },
+                        unReadCount: "$chats.total"
+                    }
+                },
+                {
+                    $project: {
+                        chats: 0
+                    }
+                }
+            ]
+            let obj = await MODELS.chat.aggregate(criteria);
+            console.log(obj)
             return { status: CODES.OK, message: MESSAGES.CHATS_FETCHED_SUCCESSFULLY, data: obj }
         }
         catch (error) {
@@ -231,10 +279,51 @@ module.exports = {
     },
     getChatId: async (payload) => {
         try {
-            let obj = await MODELS.chat.findOne({ user1: payload.user, user2: payload.userId }).lean()
-            if (obj) return { status: CODES.OK, message: MESSAGES.CHATS_FETCHED_SUCCESSFULLY, data: obj }
-            else obj = await MODELS.chat.findOne({ user1: payload.user, user2: payload.userId }).lean()
-            return { status: CODES.OK, message: MESSAGES.CHATS_FETCHED_SUCCESSFULLY, data: obj }
+            let obj = await MODELS.chat.findOne({ $or: [{ user1: payload.user, user2: payload.userId }, { user1: payload.userId, user2: payload.user }] }).lean();
+            if(!obj){
+                obj = await MODELS.chat({ user1: payload.user, user2: payload.userId }).save()
+            }
+            let criteria = [
+                {$match: {
+                    _id: obj._id
+                }},
+                {$lookup:{
+                    from: "chatmessages",
+                    let: { id: "$_id" }, 
+                    pipeline: [
+                        {
+                            $match:
+                            {
+                                $expr:
+                                {
+                                    $and:
+                                        [
+                                            { $eq: ["$chatId", "$$id"] },
+                                            { $eq: ["$isReaded", false] },
+                                            { $eq: ["$reciever", parseInt(payload.user)] }
+                                        ]
+                                }
+                            }
+                        },
+                        { $count: "total" }
+                    ],
+                    as: "chats"
+                }},
+                { $unwind: { path: '$chats', "preserveNullAndEmptyArrays": true } },
+                {
+                    $addFields: {
+                        unReadCount: { $cond: [{ $not: ["$chats.total"] }, 0, "$chats.total"] }
+                    }
+                },
+                {
+                    $project: {
+                        chats: 0
+                    }
+                }
+            ]
+            obj = await MODELS.chat.aggregate(criteria);
+            console.log(obj);
+            return { status: CODES.OK, message: MESSAGES.CHATS_FETCHED_SUCCESSFULLY, data: obj[0]}
         }
         catch (error) {
             console.log(error)
@@ -249,4 +338,40 @@ module.exports = {
             console.log(error)
         }
     },
+    getChatUsers: async (payload) => {
+        try {
+            let criteria = [
+                {
+                    $match: {
+                        $or: [
+                            { user1: parseInt(payload) },
+                            { user2: parseInt(payload) }
+                        ]
+                    }
+                },
+                {
+                    $project: {
+                        user: {
+                            $cond: {
+                                if: { $eq: ["user1", parseInt(payload)] },
+                                then: "$user1",
+                                else: "$user2"
+                            }
+                        }
+                    }
+                },
+                {
+                    $group: {
+                        _id: null,
+                        users: {$push: {user:"$user", chatId: "$_id"}}
+                    }
+                }
+            ]
+            let users = await MODELS.chat.aggregate(criteria)
+            return users
+        }
+        catch (error) {
+            console.log(error)
+        }
+    }
 }
